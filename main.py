@@ -7,11 +7,21 @@ import torch.utils.data as td
 from torchvision.datasets import ImageFolder
 from torchvision.transforms import ToTensor
 
-# To download torch, create the following environment:
-# conda create -n pytorch python=3.6
+# To download torch, create the following environment using Anaconda:
+'conda create -n pytorch python=3.6'
+
 # Then activate the environment by running
-# conda activate pytorch
+'conda activate pytorch'
+
+# Install using pip torch & torch vision
+'pip install torchvision --user'
+
+# Open python shell and import the following
+'import torch'
+'import torchvision'
+
 # Then run this app
+'python main.py'
 
 print('-----------------------------------------------------')
 print('               Face Mask Detection App               ')
