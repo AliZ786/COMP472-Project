@@ -7,6 +7,8 @@ import torch.utils.data as td
 from torchvision.datasets import ImageFolder
 from torchvision.transforms import ToTensor
 
+# Install PyTorch first
+
 # To download torch, create the following environment using Anaconda:
 'conda create -n pytorch python=3.6'
 
@@ -20,7 +22,7 @@ from torchvision.transforms import ToTensor
 'import torch'
 'import torchvision'
 
-# Then run this app
+# Then run this app using anaconda
 'python main.py'
 
 print('-----------------------------------------------------')
@@ -38,14 +40,14 @@ print("- The dataset has 2 classes", dataset.classes,
 # Training data
 training_dir = './dataset/Training'
 training_dataset = ImageFolder(training_dir, transform=ToTensor())
-print("- Class", training_dataset.classes,
-      "inside Training Folder contains", len(training_dataset), "images")
+print("- The training dataset has the classes", training_dataset.classes,
+      "and contains", len(training_dataset), "images")
 
 # Testing data
 testing_dir = './dataset/Testing'
 testing_dataset = ImageFolder(testing_dir, transform=ToTensor())
-print("- Class", testing_dataset.classes,
-      "inside Testing Folder contains", len(testing_dataset), "images")
+print("- The testing dataset has the classes", testing_dataset.classes,
+      "and contains", len(testing_dataset), "images")
 
 # Processing the images (resizing and normalizing)
 dataset = ImageFolder(data_dir, transforms.Compose([
