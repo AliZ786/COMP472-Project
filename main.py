@@ -1,6 +1,5 @@
-import os
-
-from PIL import Image
+import warnings
+warnings.filterwarnings("ignore")
 
 if __name__ == '__main__':
       import torch
@@ -11,12 +10,8 @@ if __name__ == '__main__':
       import torch.utils.data as td
       from torchvision.datasets import ImageFolder
       from torchvision.transforms import ToTensor
-      import sys
-      import warnings
-
-      if not sys.warnoptions:
-            warnings.simplefilter("ignore")
-
+      import os
+      from PIL import Image
       # Install PyTorch first
       # To download torch, create the following environment using Anaconda:
       'conda create -n pytorch python=3.6'
@@ -37,17 +32,6 @@ if __name__ == '__main__':
       print('')
       print('Images Collected Statistics:')
 
-      # dataset
-      path = './dataset'
-      for folder in os.listdir(path):
-            sub_folder_path = os.path.join(path,folder)
-            for mask_folder in os.listdir(sub_folder_path):
-                  mask_sets = os.path.join(sub_folder_path,mask_folder)
-                  for file in  os.listdir(mask_sets):
-                        file_path = os.path.join(mask_sets,file)
-                        im=Image.open(file_path)
-                        rbg_im = im.convert('RGB')
-      print("Image conversion done\n")
       dataset = ImageFolder('./dataset', transform=ToTensor())
       print("- The dataset has classes", dataset.classes,
             "and contains", len(dataset), "images")
