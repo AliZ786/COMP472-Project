@@ -32,6 +32,16 @@ if __name__ == '__main__':
       print('Images Collected Statistics:')
 
       # dataset
+      path = './dataset'
+      for folder in os.listdir(path):
+            sub_folder_path = os.path.join(path,folder)
+            for mask_folder in os.listdir(sub_folder_path):
+                  mask_sets = os.path.join(sub_folder_path,mask_folder)
+                  for file in  os.listdir(mask_sets):
+                        file_path = os.path.join(mask_sets,file)
+                        im=Image.open(file_path)
+                        rbg_im = im.convert('RGB')
+      print("Image conversion done\n")
       dataset = ImageFolder('./dataset', transform=ToTensor())
       print("- The dataset has classes", dataset.classes,
             "and contains", len(dataset), "images")
