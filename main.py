@@ -11,6 +11,11 @@ if __name__ == '__main__':
       import torch.utils.data as td
       from torchvision.datasets import ImageFolder
       from torchvision.transforms import ToTensor
+      import sys
+      import warnings
+
+      if not sys.warnoptions:
+            warnings.simplefilter("ignore")
 
       # Install PyTorch first
       # To download torch, create the following environment using Anaconda:
@@ -24,6 +29,7 @@ if __name__ == '__main__':
       'import torchvision'
       # Then run this app using anaconda
       'python main.py'
+
 
       print('-----------------------------------------------------')
       print('               Face Mask Detection App               ')
@@ -44,7 +50,7 @@ if __name__ == '__main__':
       transform= transforms.Compose([
             transforms.Resize((64, 64)),
             transforms.ToTensor(),
-            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+            transforms.Normalize((0.1, 0.1, 0.1), (0.1, 0.1, 0.1))])
 
       training_set = datasets.ImageFolder(root='./dataset/Training', transform=transform)
       train_loader = torch.utils.data.DataLoader(training_set, batch_size=4, shuffle=True, num_workers=2)
@@ -114,13 +120,13 @@ if __name__ == '__main__':
 
       print('Training Done')
 
-      # with torch.no_grad():
-      #       correct = 0
-      #       total = 0
-      #       for (images, labels) in test_loader:
-      #             outputs = model(images)
-      #             _, predicted = torch.max(outputs.data, 1)
-      #             total += labels.size(0)
-      #             correct += (predicted == labels).sum().item()
-      #       print('Test Accuracy of the model on the 10000 test images: {} %'
-      #             .format((correct / total) * 100))
+      with torch.no_grad():
+            correct = 0
+            total = 0
+            for (images, labels) in test_loader:
+                  outputs = model(images)
+                  _, predicted = torch.max(outputs.data, 1)
+                  total += labels.size(0)
+                  correct += (predicted == labels).sum().item()
+            print('Test Accuracy of the model on the 400 test images: {} %'
+                  .format((correct / total) * 100))
