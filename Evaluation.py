@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import os
 
 
-cloth = "./dataset/Cloth mask"
+cloth = "./dataset/Cloth Mask"
 n95 = "./dataset/N95 Mask"
 no = "./dataset/No Mask"
 surgical = "./dataset/Surgical Mask"
@@ -45,7 +45,7 @@ for index, data in enumerate(y):
    plt.text(x=index, y=data+1, s=f"{data}",
              fontdict=dict(fontsize=12, color='maroon'))
 
-# plt.savefig("MaskDistribution.pdf")
+#plt.savefig("MaskDistribution.pdf")
 
 
 

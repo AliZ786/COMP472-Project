@@ -39,7 +39,13 @@ if __name__ == '__main__':
       learning_rate = 0.001
 
       # transform process the images (resizing and normalizing)
-      transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+      transform= transforms.Compose([
+            transforms.Resize(256),
+            transforms.CenterCrop(224),
+            transforms.RandomHorizontalFlip(),  # randomly flip and rotate
+            transforms.RandomRotation(10),
+            transforms.ToTensor(),
+            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 
       # loading the images using DataLoader
       train_len = len(dataset) - 100
@@ -47,10 +53,10 @@ if __name__ == '__main__':
       trainset, testset = torch.utils.data.random_split(dataset, [train_len, test_len])
 
       trainset = datasets.ImageFolder(data_dir, transform=transform)
-      train_loader = torch.utils.data.DataLoader(trainset, batch_size=30, shuffle=True, num_workers=2)
+      train_loader = torch.utils.data.DataLoader(trainset, batch_size=40, shuffle=True, num_workers=2)
 
       testset = datasets.ImageFolder(data_dir, transform=transform)
-      test_loader = torch.utils.data.DataLoader(testset, batch_size=30, shuffle=True, num_workers=2)
+      test_loader = torch.utils.data.DataLoader(testset, batch_size=40, shuffle=False, num_workers=2)
 
       device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -98,3 +104,38 @@ if __name__ == '__main__':
       criterion = nn.CrossEntropyLoss()
       optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
+      total_step = len(trainset)
+      loss_list = []
+      acc_list = []
+
+      for epoch in range(num_epochs):
+            for i, (images, labels) in enumerate(trainset):
+                  # Forward pass
+                  outputs = model(images)
+                  loss = criterion(outputs, labels)
+                  loss_list.append(loss.item())
+                  # Backprop and optimisation
+                  optimizer.zero_grad()
+                  loss.backward()
+                  optimizer.step()
+                  # Train accuracy
+                  total = labels.size(0)
+                  _, predicted = torch.max(outputs.data, 1)
+                  correct = (predicted == labels).sum().item()
+                  acc_list.append(correct / total)
+                  if (i + 1) % 100 == 0:
+                        print('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}, Accuracy: {:.2f}%'
+                              .format(epoch + 1, num_epochs, i + 1, total_step, loss.item(), (correct / total) * 100))
+
+      model.eval()
+
+      # with torch.no_grad():
+      #       correct = 0
+      #       total = 0
+      #       for (images, labels) in test_loader:
+      #             outputs = model(images)
+      #             _, predicted = torch.max(outputs.data, 1)
+      #             total += labels.size(0)
+      #             correct += (predicted == labels).sum().item()
+      #       print('Test Accuracy of the model on the 10000 test images: {} %'
+      #             .format((correct / total) * 100))
