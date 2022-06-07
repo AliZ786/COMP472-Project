@@ -6,12 +6,10 @@ if __name__ == '__main__':
       import torchvision.transforms as transforms
       import torchvision.datasets as datasets
       import torch.nn as nn
-      import torch.nn.functional as F
       import torch.utils.data as td
       from torchvision.datasets import ImageFolder
       from torchvision.transforms import ToTensor
-      import os
-      from PIL import Image
+
       # Install PyTorch first
       # To download torch, create the following environment using Anaconda:
       'conda create -n pytorch python=3.6'
@@ -43,22 +41,16 @@ if __name__ == '__main__':
       # transform process the images (resizing and normalizing)
       transform= transforms.Compose([
             transforms.Resize((32, 32)),
-            transforms.RandomHorizontalFlip(p=0.5),
-            transforms.RandomVerticalFlip(p=0.5),
-            transforms.RandomRotation(25),
             transforms.ToTensor(),
-            transforms.ColorJitter(brightness=0.2, contrast=0.1, saturation=0.05, hue=0.02),
-            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+            transforms.Normalize([0, 0, 0], [1, 1, 1])])
 
       training_set = datasets.ImageFolder(root='./dataset/Training', transform=transform)
       train_loader = torch.utils.data.DataLoader(training_set, batch_size=4, shuffle=True, num_workers=2)
-      print("- The training dataset has classes", training_set.classes,
-            "and contains", len(training_set), "images")
+      print("- The training dataset has classes", training_set.classes, "and contains", len(training_set), "images")
 
       testing_set = datasets.ImageFolder(root='./dataset/Testing', transform=transform)
       test_loader = torch.utils.data.DataLoader(testing_set, batch_size=4, shuffle=False, num_workers=2)
-      print("- The testing dataset has classes", testing_set.classes,
-            "and contains", len(testing_set), "images")
+      print("- The testing dataset has classes", testing_set.classes, "and contains", len(testing_set), "images")
 
       device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
       print("The device used is", device)
