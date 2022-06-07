@@ -38,13 +38,17 @@ if __name__ == '__main__':
 
       num_epochs = 4
       num_classes = 4
-      learning_rate = 0.001
+      learning_rate = 0.00001
 
       # transform process the images (resizing and normalizing)
       transform= transforms.Compose([
-            transforms.Resize((64, 64)),
+            transforms.Resize((32, 32)),
+            transforms.RandomHorizontalFlip(p=0.5),
+            transforms.RandomVerticalFlip(p=0.5),
+            transforms.RandomRotation(25),
             transforms.ToTensor(),
-            transforms.Normalize((0.1, 0.1, 0.1), (0.1, 0.1, 0.1))])
+            transforms.ColorJitter(brightness=0.2, contrast=0.1, saturation=0.05, hue=0.02),
+            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 
       training_set = datasets.ImageFolder(root='./dataset/Training', transform=transform)
       train_loader = torch.utils.data.DataLoader(training_set, batch_size=4, shuffle=True, num_workers=2)
@@ -64,26 +68,42 @@ if __name__ == '__main__':
       class CNN(nn.Module):
             def __init__(self):
                   super(CNN, self).__init__()
-                  self.conv1 = nn.Conv2d(3, 6, 5)
-                  self.pool = nn.MaxPool2d(2, 2)
-                  self.conv2 = nn.Conv2d(6, 16, 5)
-                  self.fc1 = nn.Linear(16 * 13 * 13, 120)
-                  self.fc2 = nn.Linear(120, 84)
-                  self.fc3 = nn.Linear(84, 10)
+                  self.conv_layer = nn.Sequential(
+                        nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, padding=1),
+                        nn.BatchNorm2d(32),
+                        nn.LeakyReLU(inplace=True),
+                        nn.Conv2d(in_channels=32, out_channels=32, kernel_size=3, padding=1),
+                        nn.BatchNorm2d(32),
+                        nn.LeakyReLU(inplace=True),
+                        nn.MaxPool2d(kernel_size=2, stride=2),
+                        nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, padding=1),
+                        nn.BatchNorm2d(64),
+                        nn.LeakyReLU(inplace=True),
+                        nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, padding=1),
+                        nn.BatchNorm2d(64),
+                        nn.LeakyReLU(inplace=True),
+                        nn.MaxPool2d(kernel_size=2, stride=2),
+                  )
+                  self.fc_layer = nn.Sequential(
+                        nn.Dropout(p=0.1),
+                        nn.Linear(8 * 8 * 64, 1000),
+                        nn.ReLU(inplace=True),
+                        nn.Linear(1000, 512),
+                        nn.ReLU(inplace=True),
+                        nn.Dropout(p=0.1),
+                        nn.Linear(512, 10)
+                  )
 
             def forward(self, x):
-                  x = self.pool(F.relu(self.conv1(x)))
-                  x = self.pool(F.relu(self.conv2(x)))
-                  x = x.view(4, 16 * 13 * 13)
-                  x = F.relu(self.fc1(x))
-                  x = F.relu(self.fc2(x))
-                  x = self.fc3(x)
+                  x = self.conv_layer(x)
+                  x = x.view(x.size(0), -1)
+                  x = self.fc_layer(x)
                   return x
 
       model = CNN().to(device)
 
       criterion = nn.CrossEntropyLoss()
-      optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
+      optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
       total_step = len(train_loader)
       loss_list = []
@@ -109,11 +129,11 @@ if __name__ == '__main__':
                   correct = (predicted == labels).sum().item()
                   acc_list.append(correct / total)
                   if (i + 1) % 100 == 0:
-                        print('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}, Accuracy: {:.2f}%'
-                              .format(epoch + 1, num_epochs, i + 1, total_step, loss.item(), (correct / total) * 100))
-
+                        print('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}, Accuracy: {:.2f}%, Class:[{}]'
+                              .format(epoch + 1, num_epochs, i + 1, total_step, loss.item(), (correct / total) * 100, training_set.classes[epoch]))
       print('Training Done')
 
+      model.eval()
       with torch.no_grad():
             correct = 0
             total = 0
@@ -124,3 +144,6 @@ if __name__ == '__main__':
                   correct += (predicted == labels).sum().item()
             print('Test Accuracy of the model on the 400 test images: {} %'
                   .format((correct / total) * 100))
+
+      torch.save(model.state_dict(), './models')
+
