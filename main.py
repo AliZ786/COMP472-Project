@@ -15,6 +15,10 @@ if __name__ == '__main__':
       import torch.optim as optim
       import numpy as np
       import matplotlib.pyplot as plt
+      from sklearn.metrics import f1_score
+      from sklearn.metrics import recall_score
+      from sklearn.metrics import precision_score
+      from torch.utils.data import random_split
 
       # Install PyTorch first
       # To download torch, create the following environment using Anaconda:
@@ -61,7 +65,10 @@ if __name__ == '__main__':
       device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
       print("The device used is", device)
 
-      y_train = np.array([y for x, y in iter(training_set)])
+      m = len(training_set)
+      train_data, val_data = random_split(training_set, [int(m - m * 0.2), int(m * 0.2)])
+
+      y_train = np.array([y for x, y in iter(train_data)])
 
       classes = ('No Mask', 'Cloth Mask', 'N95 Mask', 'Surgical Mask')
 
@@ -160,10 +167,13 @@ if __name__ == '__main__':
       device= torch.device("cpu")
       )
 
-      net.fit(training_set, y = y_train)
+      net.fit(train_data, y = y_train)
       y_pred = net.predict(testing_set)
       y_test = np.array([y for x, y in iter(testing_set)])
-      accuracy_score(y_test, y_pred)
+      print(accuracy_score(y_test, y_pred))
+      print(f1_score(y_test, y_pred, average="macro"))
+      print(recall_score(y_test, y_pred, average="macro"))
+      print(precision_score(y_test, y_pred, average="macro"))
       plot_confusion_matrix(net, testing_set, y_test.reshape(-1, 1))
       plt.show()
 
