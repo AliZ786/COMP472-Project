@@ -9,6 +9,12 @@ if __name__ == '__main__':
       import torch.utils.data as td
       from torchvision.datasets import ImageFolder
       from torchvision.transforms import ToTensor
+      from sklearn.metrics import accuracy_score
+      from sklearn.metrics import plot_confusion_matrix
+      from skorch import NeuralNetClassifier
+      import torch.optim as optim
+      import numpy as np
+      import matplotlib.pyplot as plt
 
       # Install PyTorch first
       # To download torch, create the following environment using Anaconda:
@@ -54,6 +60,8 @@ if __name__ == '__main__':
 
       device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
       print("The device used is", device)
+
+      y_train = np.array([y for x, y in iter(training_set)])
 
       classes = ('No Mask', 'Cloth Mask', 'N95 Mask', 'Surgical Mask')
 
@@ -138,4 +146,24 @@ if __name__ == '__main__':
                   .format((correct / total) * 100))
 
       torch.save(model.state_dict(), './models')
+
+      torch.manual_seed(0)
+      net = NeuralNetClassifier(
+      CNN,
+      max_epochs=4,
+      iterator_train__num_workers=4,
+      iterator_valid__num_workers=4,
+      lr=0.001,
+      batch_size=64,
+      optimizer=optim.Adam,
+      criterion=nn.CrossEntropyLoss,
+      device= torch.device("cpu")
+      )
+
+      net.fit(training_set, y = y_train)
+      y_pred = net.predict(testing_set)
+      y_test = np.array([y for x, y in iter(testing_set)])
+      accuracy_score(y_test, y_pred)
+      plot_confusion_matrix(net, testing_set, y_test.reshape(-1, 1))
+      plt.show()
 
