@@ -1,6 +1,5 @@
 import warnings
 
-from matplotlib.pyplot import savefig
 warnings.filterwarnings("ignore")
 
 if __name__ == '__main__':
@@ -23,25 +22,14 @@ if __name__ == '__main__':
       from sklearn.metrics import precision_score
       from torch.utils.data import random_split
 
-      # Install PyTorch first
-      # To download torch, create the following environment using Anaconda:
-      'conda create -n pytorch python=3.6'
-      # Then activate the environment by running
-      'conda activate pytorch'
-      # Install using pip torch & torch vision
-      'pip install torchvision --user'
-      # Open python shell and import the following
-      'import torch'
-      'import torchvision'
-      # Then run this app using anaconda
-      'python main.py'
-
 
       print('-----------------------------------------------------')
       print('               Face Mask Detection App               ')
       print('-----------------------------------------------------')
       print('')
-      print('Images Collected Statistics:')
+
+      print('           Images Collected Statistics               ')
+      print('-----------------------------------------------------')
 
       dataset = ImageFolder('./dataset', transform=ToTensor())
       print("- The dataset has classes", dataset.classes,
@@ -67,6 +55,10 @@ if __name__ == '__main__':
 
       device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
       print("The device used is", device)
+
+      print()
+      print('                  Training Part                      ')
+      print('-----------------------------------------------------')
 
       m = len(training_set)
       train_data, val_data = random_split(training_set, [int(m - m * 0.2), int(m * 0.2)])
@@ -119,47 +111,46 @@ if __name__ == '__main__':
       loss_list = []
       acc_list = []
 
-      # for epoch in range(num_epochs):
-      #       for i, (images, labels) in enumerate(train_loader, 0):
+      for epoch in range(num_epochs):
+            for i, (images, labels) in enumerate(train_loader, 0):
 
-      #             images, labels = images.to(device), labels.to(device)
+                  images, labels = images.to(device), labels.to(device)
 
-      #             # Forward pass
-      #             outputs = model(images)
-      #             loss = criterion(outputs, labels)
-      #             loss_list.append(loss.item())
+                  # Forward pass
+                  outputs = model(images)
+                  loss = criterion(outputs, labels)
+                  loss_list.append(loss.item())
 
-      #             # Backprop and optimisation
-      #             loss.backward()
-      #             optimizer.step()
+                  # Backprop and optimisation
+                  loss.backward()
+                  optimizer.step()
 
-      #             # Train accuracy
-      #             total = labels.size(0)
-      #             _, predicted = torch.max(outputs.data, 1)
-      #             correct = (predicted == labels).sum().item()
-      #             acc_list.append(correct / total)
-      #             if (i + 1) % 100 == 0:
-      #                   print('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}, Accuracy: {:.2f}%, Class:[{}]'
-      #                         .format(epoch + 1, num_epochs, i + 1, total_step, loss.item(), (correct / total) * 100, training_set.classes[epoch]))
-      # print('Training Done')
+                  # Train accuracy
+                  total = labels.size(0)
+                  _, predicted = torch.max(outputs.data, 1)
+                  correct = (predicted == labels).sum().item()
+                  acc_list.append(correct / total)
+                  if (i + 1) % 100 == 0:
+                        print('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}, Accuracy: {:.2f}%, Class:[{}]'
+                              .format(epoch + 1, num_epochs, i + 1, total_step, loss.item(), (correct / total) * 100, training_set.classes[epoch]))
+      print('Training Done')
 
-      # model.eval()
-      # with torch.no_grad():
-      #       correct = 0
-      #       total = 0
-      #       for (images, labels) in test_loader:
-      #             outputs = model(images)
-      #             _, predicted = torch.max(outputs.data, 1)
-      #             total += labels.size(0)
-      #             correct += (predicted == labels).sum().item()
-      #       print('Test Accuracy of the model on the 400 test images: {} %'
-      #             .format((correct / total) * 100))
-
-      # torch.save(model.state_dict(), './models')
+      model.eval()
+      with torch.no_grad():
+            correct = 0
+            total = 0
+            for (images, labels) in test_loader:
+                  outputs = model(images)
+                  _, predicted = torch.max(outputs.data, 1)
+                  total += labels.size(0)
+                  correct += (predicted == labels).sum().item()
+            print('Test Accuracy of the model on the 400 test images: {} %'
+                  .format((correct / total) * 100))
 
 
       print()
-      print("----- Evaluation part -----")
+      print('                   Evaluation Part                   ')
+      print('-----------------------------------------------------')
 
       torch.manual_seed(0)
       net = NeuralNetClassifier(
