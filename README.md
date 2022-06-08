@@ -23,5 +23,10 @@ https://docs.google.com/document/d/1HZvHrTKvRzlIwEa-leeImMFPz4dsGyJqNpd1tgH4kl8/
 - The repository contains a main.py file, which is responsible about displaying the statistics of the dataset, training and evaluating the model. 
 - Clone the repository 
 - Download PyTorch
+- To download torch, create the following environment using Anaconda:
+  ``` $ conda create -n pytorch python=3.6 ```
+- Activate the environment by running
+  ``` $ conda activate pytorch ```
 - Install the libraries using pip: torchvision, scikit-learn, skorch, matplotlib and numpy
 - run main.py
+  ``` $ python main.py ```
