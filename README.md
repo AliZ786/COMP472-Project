@@ -21,3 +21,4 @@ https://docs.google.com/document/d/1HZvHrTKvRzlIwEa-leeImMFPz4dsGyJqNpd1tgH4kl8/
   
 ## Running instructions
 - The repository contains a main.py file, which is responsible about displaying the statistics of the dataset, training and evaluating the model. 
+- Clone the repository and run main.py
