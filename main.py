@@ -1,7 +1,10 @@
 import warnings
+
+from matplotlib.pyplot import savefig
 warnings.filterwarnings("ignore")
 
 if __name__ == '__main__':
+      import os
       import torch
       import torchvision.transforms as transforms
       import torchvision.datasets as datasets
@@ -116,43 +119,47 @@ if __name__ == '__main__':
       loss_list = []
       acc_list = []
 
-      for epoch in range(num_epochs):
-            for i, (images, labels) in enumerate(train_loader, 0):
+      # for epoch in range(num_epochs):
+      #       for i, (images, labels) in enumerate(train_loader, 0):
 
-                  images, labels = images.to(device), labels.to(device)
+      #             images, labels = images.to(device), labels.to(device)
 
-                  # Forward pass
-                  outputs = model(images)
-                  loss = criterion(outputs, labels)
-                  loss_list.append(loss.item())
+      #             # Forward pass
+      #             outputs = model(images)
+      #             loss = criterion(outputs, labels)
+      #             loss_list.append(loss.item())
 
-                  # Backprop and optimisation
-                  loss.backward()
-                  optimizer.step()
+      #             # Backprop and optimisation
+      #             loss.backward()
+      #             optimizer.step()
 
-                  # Train accuracy
-                  total = labels.size(0)
-                  _, predicted = torch.max(outputs.data, 1)
-                  correct = (predicted == labels).sum().item()
-                  acc_list.append(correct / total)
-                  if (i + 1) % 100 == 0:
-                        print('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}, Accuracy: {:.2f}%, Class:[{}]'
-                              .format(epoch + 1, num_epochs, i + 1, total_step, loss.item(), (correct / total) * 100, training_set.classes[epoch]))
-      print('Training Done')
+      #             # Train accuracy
+      #             total = labels.size(0)
+      #             _, predicted = torch.max(outputs.data, 1)
+      #             correct = (predicted == labels).sum().item()
+      #             acc_list.append(correct / total)
+      #             if (i + 1) % 100 == 0:
+      #                   print('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}, Accuracy: {:.2f}%, Class:[{}]'
+      #                         .format(epoch + 1, num_epochs, i + 1, total_step, loss.item(), (correct / total) * 100, training_set.classes[epoch]))
+      # print('Training Done')
 
-      model.eval()
-      with torch.no_grad():
-            correct = 0
-            total = 0
-            for (images, labels) in test_loader:
-                  outputs = model(images)
-                  _, predicted = torch.max(outputs.data, 1)
-                  total += labels.size(0)
-                  correct += (predicted == labels).sum().item()
-            print('Test Accuracy of the model on the 400 test images: {} %'
-                  .format((correct / total) * 100))
+      # model.eval()
+      # with torch.no_grad():
+      #       correct = 0
+      #       total = 0
+      #       for (images, labels) in test_loader:
+      #             outputs = model(images)
+      #             _, predicted = torch.max(outputs.data, 1)
+      #             total += labels.size(0)
+      #             correct += (predicted == labels).sum().item()
+      #       print('Test Accuracy of the model on the 400 test images: {} %'
+      #             .format((correct / total) * 100))
 
-      torch.save(model.state_dict(), './models')
+      # torch.save(model.state_dict(), './models')
+
+
+      print()
+      print("----- Evaluation part -----")
 
       torch.manual_seed(0)
       net = NeuralNetClassifier(
@@ -167,13 +174,68 @@ if __name__ == '__main__':
       device= torch.device("cpu")
       )
 
+      cloth_train = "./dataset/Training/Cloth Mask"
+      n95_train = "./dataset/Training/N95 Mask"
+      no_train = "./dataset/Training/No Mask"
+      surgical_train = "./dataset/Training/Surgical Mask"
+
+      
+      totalClothFiles = 0
+      totalN95Files = 0
+      totalNoFiles = 0
+      totalSurgicalFiles = 0
+
+      for base, dirs, files in os.walk(cloth_train):
+       for Files in files:
+        totalClothFiles += 1
+
+      for base, dirs, files in os.walk(n95_train):
+       for Files in files:
+        totalN95Files += 1
+
+      for base, dirs, files in os.walk(no_train):
+       for Files in files:
+        totalNoFiles += 1
+
+      for base, dirs, files in os.walk(surgical_train):
+       for Files in files:
+        totalSurgicalFiles += 1
+
+      x = range(4)
+
+      x_labels = ["Cloth", "N95", "No", "Surgical"]
+
+      y = [totalClothFiles, totalN95Files, totalNoFiles, totalSurgicalFiles]
+
+      plt.bar(x,y, color=['black', 'red', 'blue', 'green'])
+
+      plt.title("Number of masks per type")
+      plt.ylabel("Total number of masks per type", fontsize =10)
+      plt.xticks(x, x_labels)
+
+
+      for index, data in enumerate(y):
+        plt.text(x=index, y=data+1, s=f"{data}",
+                  fontdict=dict(fontsize=12, color='maroon'))
+
+      # plt.savefig("MaskDistribution_Train.pdf")
+
+
+
+
       net.fit(train_data, y = y_train)
       y_pred = net.predict(testing_set)
       y_test = np.array([y for x, y in iter(testing_set)])
-      print(accuracy_score(y_test, y_pred))
-      print(f1_score(y_test, y_pred, average="macro"))
-      print(recall_score(y_test, y_pred, average="macro"))
-      print(precision_score(y_test, y_pred, average="macro"))
+
+      acc_score = accuracy_score(y_test, y_pred)
+      f1 = f1_score(y_test, y_pred, average="macro")
+      recall = recall_score(y_test, y_pred, average="macro")
+      precision = precision_score(y_test, y_pred, average="macro")
+
+      print(f"The accuracy score of the test set: {acc_score: .2f}")
+      print(f"The f1-score of the test set is: {f1: .2f}")
+      print(f"The recall of the test set is: {recall: .2f}")
+      print(f"The precision of the test set is: {precision: .2f}")
       plot_confusion_matrix(net, testing_set, y_test.reshape(-1, 1))
       plt.show()
 
