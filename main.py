@@ -240,6 +240,6 @@ if __name__ == '__main__':
       print(f"The f1-score of the test set is: {f1: .2f}")
       print(f"The recall of the test set is: {recall: .2f}")
       print(f"The precision of the test set is: {precision: .2f}")
-      plot_confusion_matrix(net, testing_set, y_test.reshape(-1, 1))
+      plot_confusion_matrix(net, testing_set, y_test.reshape(-1, 1), display_labels = ['No Mask', 'N95 Mask', 'Cloth Mask', 'Surgical Mask'])
       plt.show()
 
