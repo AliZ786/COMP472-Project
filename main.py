@@ -37,13 +37,13 @@ if __name__ == '__main__':
 
       num_epochs = 4
       num_classes = 4
-      learning_rate = 0.00001
+      learning_rate = 0.000001
 
       # transform process the images (resizing and normalizing)
       transform= transforms.Compose([
-            transforms.Resize((32, 32)),
+            transforms.Resize((64, 64)),
             transforms.ToTensor(),
-            transforms.Normalize([0, 0, 0], [1, 1, 1])])
+            transforms.Normalize([0.5, 0.5, 0.5], [1, 1, 1])])
 
       training_set = datasets.ImageFolder(root='./dataset/Training', transform=transform)
       train_loader = torch.utils.data.DataLoader(training_set, batch_size=4, shuffle=True, num_workers=2)
@@ -88,12 +88,12 @@ if __name__ == '__main__':
                   )
                   self.fc_layer = nn.Sequential(
                         nn.Dropout(p=0.1),
-                        nn.Linear(8 * 8 * 64, 1000),
+                        nn.Linear(64 * 64 * 4, 1000),
                         nn.ReLU(inplace=True),
                         nn.Linear(1000, 512),
                         nn.ReLU(inplace=True),
                         nn.Dropout(p=0.1),
-                        nn.Linear(512, 10)
+                        nn.Linear(512, 4)
                   )
 
             def forward(self, x):
