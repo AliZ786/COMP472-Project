@@ -46,7 +46,7 @@ if __name__ == '__main__':
             transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])])
 
       training_set = datasets.ImageFolder(root='./dataset/Training', transform=transform)
-      train_loader = torch.utils.data.DataLoader(training_set, batch_size=8, shuffle=True, num_workers=2)
+      train_loader = torch.utils.data.DataLoader(training_set, batch_size=4, shuffle=True, num_workers=2)
       print("- The training dataset has classes", training_set.classes, "and contains", len(training_set), "images")
 
       train_age_set = datasets.ImageFolder(root='./dataset/Age Training', transform=transform)
@@ -59,7 +59,7 @@ if __name__ == '__main__':
             "images")
 
       testing_set = datasets.ImageFolder(root='./dataset/Testing', transform=transform)
-      test_loader = torch.utils.data.DataLoader(testing_set, batch_size=8, shuffle=False, num_workers=2)
+      test_loader = torch.utils.data.DataLoader(testing_set, batch_size=4, shuffle=False, num_workers=2)
       print("- The testing dataset has classes", testing_set.classes, "and contains", len(testing_set), "images")
 
       device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
