@@ -135,6 +135,8 @@ if __name__ == '__main__':
                               .format(epoch + 1, num_epochs, i + 1, total_step, loss.item(), (correct / total) * 100, training_set.classes[epoch]))
       print('Training Done')
 
+
+
       model.eval()
       with torch.no_grad():
             correct = 0
@@ -146,6 +148,8 @@ if __name__ == '__main__':
                   correct += (predicted == labels).sum().item()
             print('Test Accuracy of the model on the 400 test images: {} %'
                   .format((correct / total) * 100))
+
+      torch.save(model.state_dict(), "Trained_Model")
 
 
       print()
