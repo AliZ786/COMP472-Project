@@ -37,8 +37,8 @@ if __name__ == '__main__':
       print("- The dataset has classes", dataset.classes,
             "and contains", len(dataset), "images")
 
-      num_epochs = 4
-      num_classes = 4
+      num_epochs = 2
+      num_classes = 2
       learning_rate = 0.000001
 
       # transform process the images (resizing and normalizing)
@@ -52,7 +52,7 @@ if __name__ == '__main__':
       print("- The age-based training dataset has classes", train_age_set.classes, "and contains", len(train_age_set), "images")
       print(train_age_set.classes)
 
-      testing_set = datasets.ImageFolder(root='./dataset/Testing', transform=transform)
+      testing_set = datasets.ImageFolder(root='./dataset/Age Testing', transform=transform)
       test_loader = torch.utils.data.DataLoader(testing_set, batch_size=4, shuffle=False, num_workers=2)
       print("- The testing dataset has classes", testing_set.classes, "and contains", len(testing_set), "images")
 
@@ -69,7 +69,7 @@ if __name__ == '__main__':
 
       y_train = np.array([y for x, y in iter(train_data)])
 
-      classes = ('No Mask', 'Cloth Mask', 'N95 Mask', 'Surgical Mask')
+      classes = ('Old', 'Young')
 
       class CNN(nn.Module):
             def __init__(self):
@@ -97,7 +97,7 @@ if __name__ == '__main__':
                         nn.Linear(1000, 512),
                         nn.ReLU(inplace=True),
                         nn.Dropout(p=0.1),
-                        nn.Linear(512, 4)
+                        nn.Linear(512, 2)
                   )
 
             def forward(self, x):
@@ -187,5 +187,5 @@ if __name__ == '__main__':
       print(f"The f1-score of the test set is: {f1: .2f}")
       print(f"The recall of the test set is: {recall: .2f}")
       print(f"The precision of the test set is: {precision: .2f}")
-      plot_confusion_matrix(net, testing_set, y_test.reshape(-1, 1), display_labels = ['No Mask', 'N95 Mask', 'Cloth Mask', 'Surgical Mask'])
+      plot_confusion_matrix(net, testing_set, y_test.reshape(-1, 1), display_labels = ['Old', 'Young'])
       plt.show()

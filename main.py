@@ -50,11 +50,11 @@ if __name__ == '__main__':
       print("- The training dataset has classes", training_set.classes, "and contains", len(training_set), "images")
 
       train_age_set = datasets.ImageFolder(root='./dataset/Age Training', transform=transform)
-      train_age_loader = torch.utils.data.DataLoader(train_age_set, batch_size=8, shuffle=True, num_workers=2)
+      train_age_loader = torch.utils.data.DataLoader(train_age_set, batch_size=4, shuffle=True, num_workers=2)
       print("- The age-based training dataset has classes", train_age_set.classes, "and contains", len(train_age_set), "images")
 
       train_gender_set = datasets.ImageFolder(root='./dataset/Gender Training', transform=transform)
-      train_gender_loader = torch.utils.data.DataLoader(train_gender_set, batch_size=8, shuffle=True, num_workers=2)
+      train_gender_loader = torch.utils.data.DataLoader(train_gender_set, batch_size=4, shuffle=True, num_workers=2)
       print("- The gender-based training dataset has classes", train_gender_set.classes, "and contains", len(train_gender_set),
             "images")
 
