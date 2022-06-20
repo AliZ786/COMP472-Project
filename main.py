@@ -41,16 +41,25 @@ if __name__ == '__main__':
 
       # transform process the images (resizing and normalizing)
       transform= transforms.Compose([
-            transforms.Resize((128, 128)),
+            transforms.Resize((32, 32)),
             transforms.ToTensor(),
-            transforms.Normalize([0.5, 0.5, 0.5], [1, 1, 1])])
+            transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])])
 
       training_set = datasets.ImageFolder(root='./dataset/Training', transform=transform)
-      train_loader = torch.utils.data.DataLoader(training_set, batch_size=4, shuffle=True, num_workers=2)
+      train_loader = torch.utils.data.DataLoader(training_set, batch_size=8, shuffle=True, num_workers=2)
       print("- The training dataset has classes", training_set.classes, "and contains", len(training_set), "images")
 
+      train_age_set = datasets.ImageFolder(root='./dataset/Age Training', transform=transform)
+      train_age_loader = torch.utils.data.DataLoader(train_age_set, batch_size=8, shuffle=True, num_workers=2)
+      print("- The age-based training dataset has classes", train_age_set.classes, "and contains", len(train_age_set), "images")
+
+      train_gender_set = datasets.ImageFolder(root='./dataset/Gender Training', transform=transform)
+      train_gender_loader = torch.utils.data.DataLoader(train_gender_set, batch_size=8, shuffle=True, num_workers=2)
+      print("- The gender-based training dataset has classes", train_gender_set.classes, "and contains", len(train_gender_set),
+            "images")
+
       testing_set = datasets.ImageFolder(root='./dataset/Testing', transform=transform)
-      test_loader = torch.utils.data.DataLoader(testing_set, batch_size=4, shuffle=False, num_workers=2)
+      test_loader = torch.utils.data.DataLoader(testing_set, batch_size=8, shuffle=False, num_workers=2)
       print("- The testing dataset has classes", testing_set.classes, "and contains", len(testing_set), "images")
 
       device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -88,7 +97,7 @@ if __name__ == '__main__':
                   )
                   self.fc_layer = nn.Sequential(
                         nn.Dropout(p=0.1),
-                        nn.Linear(128 * 128 * 4, 1000),
+                        nn.Linear(32 * 32 * 4, 1000),
                         nn.ReLU(inplace=True),
                         nn.Linear(1000, 512),
                         nn.ReLU(inplace=True),
