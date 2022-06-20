@@ -41,7 +41,7 @@ if __name__ == '__main__':
 
       # transform process the images (resizing and normalizing)
       transform= transforms.Compose([
-            transforms.Resize((64, 64)),
+            transforms.Resize((128, 128)),
             transforms.ToTensor(),
             transforms.Normalize([0.5, 0.5, 0.5], [1, 1, 1])])
 
@@ -88,7 +88,7 @@ if __name__ == '__main__':
                   )
                   self.fc_layer = nn.Sequential(
                         nn.Dropout(p=0.1),
-                        nn.Linear(64 * 64 * 4, 1000),
+                        nn.Linear(128 * 128 * 4, 1000),
                         nn.ReLU(inplace=True),
                         nn.Linear(1000, 512),
                         nn.ReLU(inplace=True),
