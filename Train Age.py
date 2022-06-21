@@ -69,7 +69,7 @@ if __name__ == '__main__':
 
       y_train = np.array([y for x, y in iter(train_data)])
 
-      classes = ('Old', 'Young')
+      classes = ('Old', 'Children')
 
       class CNN(nn.Module):
             def __init__(self):
@@ -187,5 +187,5 @@ if __name__ == '__main__':
       print(f"The f1-score of the test set is: {f1: .2f}")
       print(f"The recall of the test set is: {recall: .2f}")
       print(f"The precision of the test set is: {precision: .2f}")
-      plot_confusion_matrix(net, testing_set, y_test.reshape(-1, 1), display_labels = ['Old', 'Young'])
+      plot_confusion_matrix(net, testing_set, y_test.reshape(-1, 1), display_labels = ['Old', 'Children'])
       plt.show()
