@@ -47,14 +47,22 @@ if __name__ == '__main__':
             transforms.ToTensor(),
             transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])])
 
-      train_age_set = datasets.ImageFolder(root='./dataset/Age Training', transform=transform)
-      train_age_loader = torch.utils.data.DataLoader(train_age_set, batch_size=4, shuffle=True, num_workers=2)
-      print("- The age-based training dataset has classes", train_age_set.classes, "and contains", len(train_age_set), "images")
-      print(train_age_set.classes)
+      age_set = datasets.ImageFolder(root='./dataset/Age Training', transform=transform)
 
-      testing_set = datasets.ImageFolder(root='./dataset/Age Testing', transform=transform)
-      test_loader = torch.utils.data.DataLoader(testing_set, batch_size=4, shuffle=False, num_workers=2)
-      print("- The testing dataset has classes", testing_set.classes, "and contains", len(testing_set), "images")
+      testing_size = len(age_set) * 0.2
+      training_size = len(age_set) - (testing_size)
+
+      training_set, testing_set = torch.utils.data.random_split(
+            age_set, [int(training_size), int(testing_size)]
+      )
+
+      print("- The age-based training dataset has classes", age_set.classes, "and contains", len(age_set),
+            "images")
+
+      train_loader = torch.utils.data.DataLoader(training_set, batch_size=2, shuffle=True, num_workers=2)
+      print("- The training dataset contains", len(training_set), "images")
+      test_loader = torch.utils.data.DataLoader(testing_set, batch_size=2, shuffle=False, num_workers=2)
+      print("- The testing dataset contains", len(testing_set), "images")
 
 
       device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -64,8 +72,8 @@ if __name__ == '__main__':
       print('                  Training Part                      ')
       print('-----------------------------------------------------')
 
-      m = len(train_age_set)
-      train_data, val_data = random_split(train_age_set, [int(m - m * 0.2), int(m * 0.2)])
+      m = len(age_set)
+      train_data, val_data = random_split(age_set, [int(m - m * 0.2), int(m * 0.2)])
 
       y_train = np.array([y for x, y in iter(train_data)])
 
@@ -111,13 +119,13 @@ if __name__ == '__main__':
       criterion = nn.CrossEntropyLoss()
       optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
-      total_step = len(train_age_loader)
+      total_step = len(train_loader)
       loss_list = []
       acc_list = []
 
 
       for epoch in range(num_epochs):
-            for i, (images, labels) in enumerate(train_age_loader, 0):
+            for i, (images, labels) in enumerate(train_loader, 0):
 
                   images, labels = images.to(device), labels.to(device)
 
@@ -137,7 +145,7 @@ if __name__ == '__main__':
                   acc_list.append(correct / total)
                   if (i + 1) % 100 == 0:
                         print('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}, Accuracy: {:.2f}%, Class:[{}]'
-                              .format(epoch + 1, num_epochs, i + 1, total_step, loss.item(), (correct / total) * 100, train_age_set.classes[epoch]))
+                              .format(epoch + 1, num_epochs, i + 1, total_step, loss.item(), (correct / total) * 100, age_set.classes[epoch]))
       print('Training Done')
 
 
