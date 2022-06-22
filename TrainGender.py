@@ -1,5 +1,7 @@
 import warnings
 
+from sklearn.metrics import classification_report, confusion_matrix
+
 warnings.filterwarnings("ignore")
 
 if __name__ == '__main__':
@@ -22,6 +24,7 @@ if __name__ == '__main__':
     from sklearn.metrics import precision_score
     from torch.utils.data import random_split, SubsetRandomSampler
     from sklearn.model_selection import KFold
+    import seaborn as sns
 
 
     print('-----------------------------------------------------')
@@ -79,6 +82,9 @@ if __name__ == '__main__':
     y_train = np.array([y for x, y in iter(train_data)])
 
     classes = ('Men', 'Women')
+
+    y_true = []
+    y_pred = []
 
 
     class CNN(nn.Module):
@@ -196,8 +202,32 @@ if __name__ == '__main__':
             valid_loss+=loss.item()*images.size(0)
             scores, predictions = torch.max(output.data,1)
             val_correct+=(predictions == labels).sum().item()
+          
 
         return valid_loss,val_correct
+    
+    def get_metrics(model, dataloader):
+         model.eval()
+         prediction_list = []
+         accurate_list = []
+         with torch.no_grad():
+          for images, labels in dataloader:
+            outputs = model(images)
+            _, predicted = torch.max(model(images), 1)
+            prediction_list.extend(predicted.detach().cpu().numpy())
+            accurate_list.extend(labels.detach().cpu().numpy())
+            print("Classification Report: ")
+            print(classification_report(prediction_list, accurate_list, target_names = ['Men', 'Women']))
+
+            confusion_matrix_data = confusion_matrix(accurate_list, prediction_list)
+            conf_matrix = sns.heatmap(confusion_matrix_data, annot=True, fmt='g' )
+
+            conf_matrix.set_title('Confusion Matrix');
+            conf_matrix.set_xlabel('Predicted Categories')
+            conf_matrix.set_ylabel('Actual Categories');
+
+            conf_matrix.xaxis.set_ticklabels(["Men", "Woman"])
+            conf_matrix.yaxis.set_ticklabels(["Men", "Women"])
 
     for fold, (train_idx,val_idx) in enumerate(splits.split(np.arange(len(gender_set)))):
 
@@ -237,6 +267,7 @@ if __name__ == '__main__':
 
 
     testl_f,tl_f,testa_f,ta_f=[],[],[],[]
+
     k=10
     for f in range(1,k+1):
 
@@ -246,9 +277,13 @@ if __name__ == '__main__':
         ta_f.append(np.mean(foldperf['fold{}'.format(f)]['train_acc']))
         testa_f.append(np.mean(foldperf['fold{}'.format(f)]['test_acc']))
 
-        print('Performance of {} fold cross validation'.format(k))
-        print("Average Training Loss: {:.3f} \t Average Test Loss: {:.3f} \t Average Training Acc: {:.2f} \t Average Test Acc: {:.2f}".format(np.mean(tl_f),np.mean(testl_f),np.mean(ta_f),np.mean(testa_f)))     
-
+    print('Performance of {} fold cross validation'.format(k))
+    print("Average Training Loss: {:.3f} \t Average Test Loss: {:.3f} \t Average Training Acc: {:.2f} \t Average Test Acc: {:.2f}".format(np.mean(tl_f),np.mean(testl_f),np.mean(ta_f),np.mean(testa_f)))     
+    print()
+    
+   
+    
+    
 
 
     print()
@@ -268,18 +303,19 @@ if __name__ == '__main__':
         device=torch.device("cpu")
     )
 
-    net.fit(train_data, y=y_train)
-    y_pred = net.predict(testing_set)
-    y_test = np.array([y for x, y in iter(testing_set)])
+    # net.fit(train_data, y=y_train)
+    # y_pred = net.predict(testing_set)
+    # y_test = np.array([y for x, y in iter(testing_set)])
 
-    acc_score = accuracy_score(y_test, y_pred)
-    f1 = f1_score(y_test, y_pred, average="macro")
-    recall = recall_score(y_test, y_pred, average="macro")
-    precision = precision_score(y_test, y_pred, average="macro")
+    # acc_score = accuracy_score(y_test, y_pred)
+    # f1 = f1_score(y_test, y_pred, average="macro")
+    # recall = recall_score(y_test, y_pred, average="macro")
+    # precision = precision_score(y_test, y_pred, average="macro")
 
-    print(f"The accuracy score of the test set: {acc_score: .2f}")
-    print(f"The f1-score of the test set is: {f1: .2f}")
-    print(f"The recall of the test set is: {recall: .2f}")
-    print(f"The precision of the test set is: {precision: .2f}")
-    plot_confusion_matrix(net, testing_set, y_test.reshape(-1, 1), display_labels=['Men', 'Women'])
+    # print(f"The accuracy score of the test set: {acc_score: .2f}")
+    # print(f"The f1-score of the test set is: {f1: .2f}")
+    # print(f"The recall of the test set is: {recall: .2f}")
+    # print(f"The precision of the test set is: {precision: .2f}")
+    # plot_confusion_matrix(net, testing_set, y_test.reshape(-1, 1), display_labels=['Men', 'Women'])
+    get_metrics(model,test_loader)
     plt.show()
