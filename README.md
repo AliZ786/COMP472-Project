@@ -22,6 +22,7 @@ https://docs.google.com/document/d/1HZvHrTKvRzlIwEa-leeImMFPz4dsGyJqNpd1tgH4kl8/
 - The dataset has two folders: Training and Testing
 - Each folder has 4 classes (No Mask, N95 Mask, Surgical Mask and Cloth Mask). The training folder has 300 images in each one of its classes, while the testing folder has 100 images in each one of its classes
 - For Phase 2, we further divided the dataset to introduce a bias for the atrributes age (Old or Young) and gender (Male or Female). From the 1200 initial that we had in the training folder, we reduced to 80 each for each attribute in the testing folder
+- Link to the dataset : https://drive.google.com/file/d/1iMAL5ZT853LsHn9MEF71S0SH6HAzQnri/view?usp=sharing
 
 ## Running instructions
 
@@ -43,5 +44,5 @@ https://docs.google.com/document/d/1HZvHrTKvRzlIwEa-leeImMFPz4dsGyJqNpd1tgH4kl8/
 ## Notes
 
 - To run code from phase 1, uncomment the commented code in `main.py`, and do the command above
-- To run the code without K-Fold for phase 2, uncomment the commented code in ` TrainAge.py` & 
-` TrainGender.py`
+- To run the code without K-Fold for phase 2, uncomment the commented code in ` TrainAge.py` &
+  ` TrainGender.py`
