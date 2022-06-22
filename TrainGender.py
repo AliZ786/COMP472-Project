@@ -20,7 +20,9 @@ if __name__ == '__main__':
     from sklearn.metrics import f1_score
     from sklearn.metrics import recall_score
     from sklearn.metrics import precision_score
-    from torch.utils.data import random_split
+    from torch.utils.data import random_split, SubsetRandomSampler
+    from sklearn.model_selection import KFold
+
 
     print('-----------------------------------------------------')
     print('               Face Mask Detection App               ')
@@ -34,9 +36,12 @@ if __name__ == '__main__':
     print("- The dataset has classes", dataset.classes,
           "and contains", len(dataset), "images")
 
-    num_epochs = 2
     num_classes = 2
     learning_rate = 0.000001
+    num_epochs=4
+    batch_size=32
+    k=10
+    
 
     # transform process the images (resizing and normalizing)
     transform = transforms.Compose([
@@ -117,48 +122,134 @@ if __name__ == '__main__':
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
-    total_step = len(train_loader)
-    loss_list = []
-    acc_list = []
+    # total_step = len(train_loader)
+    # loss_list = []
+    # acc_list = []
 
-    for epoch in range(num_epochs):
-        for i, (images, labels) in enumerate(train_loader, 0):
+    # for epoch in range(num_epochs):
+    #     for i, (images, labels) in enumerate(train_loader, 0):
 
-            images, labels = images.to(device), labels.to(device)
+    #         images, labels = images.to(device), labels.to(device)
 
-            # Forward pass
-            outputs = model(images)
-            loss = criterion(outputs, labels)
-            loss_list.append(loss.item())
+    #         # Forward pass
+    #         outputs = model(images)
+    #         loss = criterion(outputs, labels)
+    #         loss_list.append(loss.item())
 
-            # Backprop and optimisation
+    #         # Backprop and optimisation
+    #         loss.backward()
+    #         optimizer.step()
+
+    #         # Train accuracy
+    #         total = labels.size(0)
+    #         _, predicted = torch.max(outputs.data, 1)
+    #         correct = (predicted == labels).sum().item()
+    #         acc_list.append(correct / total)
+    #         if (i + 1) % 100 == 0:
+    #             print('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}, Accuracy: {:.2f}%, Class:[{}]'
+    #                   .format(epoch + 1, num_epochs, i + 1, total_step, loss.item(), (correct / total) * 100,
+    #                           gender_set.classes[epoch]))
+    # print('Training Done')
+
+    # model.eval()
+    # with torch.no_grad():
+    #     correct = 0
+    #     total = 0
+    #     for (images, labels) in test_loader:
+    #         outputs = model(images)
+    #         _, predicted = torch.max(outputs.data, 1)
+    #         total += labels.size(0)
+    #         correct += (predicted == labels).sum().item()
+    #     print('Test Accuracy of the model on the 400 test images: {} %'
+    #           .format((correct / total) * 100))
+
+    # torch.save(model.state_dict(), "Trained_Gender")
+
+    splits=KFold(n_splits=k,shuffle=True,random_state=42)
+    foldperf={}
+
+    def train_epoch(model,device,dataloader,loss_fn,optimizer):
+        train_loss,train_correct=0.0,0
+        model.train()
+        for images, labels in dataloader:
+
+            images,labels = images.to(device), labels.to(device)
+            optimizer.zero_grad()
+            output = model(images)
+            loss = loss_fn(output,labels)
             loss.backward()
             optimizer.step()
+            train_loss += loss.item() * images.size(0)
+            scores, predictions = torch.max(output.data, 1)
+            train_correct += (predictions == labels).sum().item()
 
-            # Train accuracy
-            total = labels.size(0)
-            _, predicted = torch.max(outputs.data, 1)
-            correct = (predicted == labels).sum().item()
-            acc_list.append(correct / total)
-            if (i + 1) % 100 == 0:
-                print('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}, Accuracy: {:.2f}%, Class:[{}]'
-                      .format(epoch + 1, num_epochs, i + 1, total_step, loss.item(), (correct / total) * 100,
-                              gender_set.classes[epoch]))
-    print('Training Done')
+        return train_loss,train_correct
+  
+    def valid_epoch(model,device,dataloader,loss_fn):
+        valid_loss, val_correct = 0.0, 0
+        model.eval()
+        for images, labels in dataloader:
 
-    model.eval()
-    with torch.no_grad():
-        correct = 0
-        total = 0
-        for (images, labels) in test_loader:
-            outputs = model(images)
-            _, predicted = torch.max(outputs.data, 1)
-            total += labels.size(0)
-            correct += (predicted == labels).sum().item()
-        print('Test Accuracy of the model on the 400 test images: {} %'
-              .format((correct / total) * 100))
+            images,labels = images.to(device),labels.to(device)
+            output = model(images)
+            loss=loss_fn(output,labels)
+            valid_loss+=loss.item()*images.size(0)
+            scores, predictions = torch.max(output.data,1)
+            val_correct+=(predictions == labels).sum().item()
 
-    torch.save(model.state_dict(), "Trained_Gender")
+        return valid_loss,val_correct
+
+    for fold, (train_idx,val_idx) in enumerate(splits.split(np.arange(len(gender_set)))):
+
+        print('Fold {}'.format(fold + 1))
+
+        train_sampler = SubsetRandomSampler(train_idx)
+        test_sampler = SubsetRandomSampler(val_idx)
+        train_loader = torch.utils.data.DataLoader(gender_set, batch_size=32, sampler=train_sampler)
+        test_loader = torch.utils.data.DataLoader(gender_set, batch_size=32, sampler=test_sampler)
+    
+    
+
+        history = {'train_loss': [], 'test_loss': [],'train_acc':[],'test_acc':[]}
+
+        for epoch in range(num_epochs):
+            train_loss, train_correct=train_epoch(model,device,train_loader,criterion,optimizer)
+            test_loss, test_correct=valid_epoch(model,device,test_loader,criterion)
+
+            train_loss = train_loss / len(train_loader.sampler)
+            train_acc = train_correct / len(train_loader.sampler) * 100
+            test_loss = test_loss / len(test_loader.sampler)
+            test_acc = test_correct / len(test_loader.sampler) * 100
+
+            print("Epoch:{}/{} AVG Training Loss:{:.3f} AVG Test Loss:{:.3f} AVG Training Acc {:.2f} % AVG Test Acc {:.2f} %".format(epoch + 1,
+                                                                                                                num_epochs,
+                                                                                                                train_loss,
+                                                                                                                test_loss,
+                                                                                                                train_acc,
+                                                                                                                test_acc))
+            history['train_loss'].append(train_loss)
+            history['test_loss'].append(test_loss)
+            history['train_acc'].append(train_acc)
+            history['test_acc'].append(test_acc)
+            foldperf['fold{}'.format(fold+1)] = history  
+
+    torch.save(model,'k_cross_Gender.pt')   
+
+
+    testl_f,tl_f,testa_f,ta_f=[],[],[],[]
+    k=10
+    for f in range(1,k+1):
+
+        tl_f.append(np.mean(foldperf['fold{}'.format(f)]['train_loss']))
+        testl_f.append(np.mean(foldperf['fold{}'.format(f)]['test_loss']))
+
+        ta_f.append(np.mean(foldperf['fold{}'.format(f)]['train_acc']))
+        testa_f.append(np.mean(foldperf['fold{}'.format(f)]['test_acc']))
+
+        print('Performance of {} fold cross validation'.format(k))
+        print("Average Training Loss: {:.3f} \t Average Test Loss: {:.3f} \t Average Training Acc: {:.2f} \t Average Test Acc: {:.2f}".format(np.mean(tl_f),np.mean(testl_f),np.mean(ta_f),np.mean(testa_f)))     
+
+
 
     print()
     print('                   Evaluation Part                   ')
