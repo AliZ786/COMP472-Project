@@ -42,6 +42,6 @@ https://docs.google.com/document/d/1HZvHrTKvRzlIwEa-leeImMFPz4dsGyJqNpd1tgH4kl8/
 
 ## Notes
 
-- To run code from phase 1, uncomment the commented code in `$ main.py`, and do the command above
-- To run the code without K-Fold for phase 2, uncomment the commented code in `$ TrainAge.py` & 
-`$ TrainGender.py`
+- To run code from phase 1, uncomment the commented code in `main.py`, and do the command above
+- To run the code without K-Fold for phase 2, uncomment the commented code in ` TrainAge.py` & 
+` TrainGender.py`
