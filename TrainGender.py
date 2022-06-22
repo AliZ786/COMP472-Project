@@ -216,21 +216,23 @@ if __name__ == '__main__':
             _, predicted = torch.max(model(images), 1)
             prediction_list.extend(predicted.detach().cpu().numpy())
             accurate_list.extend(labels.detach().cpu().numpy())
-            print("Classification Report: ")
-            print(classification_report(prediction_list, accurate_list, target_names = ['Men', 'Women']))
+          print()
+          print("Classification Report: ")
+          print(classification_report(prediction_list, accurate_list, target_names = ['Men', 'Women']))
 
-            confusion_matrix_data = confusion_matrix(accurate_list, prediction_list)
-            conf_matrix = sns.heatmap(confusion_matrix_data, annot=True, fmt='g' )
+          confusion_matrix_data = confusion_matrix(accurate_list, prediction_list)
+          conf_matrix = sns.heatmap(confusion_matrix_data, annot=True, fmt='g' )
 
-            conf_matrix.set_title('Confusion Matrix');
-            conf_matrix.set_xlabel('Predicted Categories')
-            conf_matrix.set_ylabel('Actual Categories');
+          conf_matrix.set_title('Confusion Matrix');
+          conf_matrix.set_xlabel('Predicted Categories')
+          conf_matrix.set_ylabel('Actual Categories');
 
-            conf_matrix.xaxis.set_ticklabels(["Men", "Woman"])
-            conf_matrix.yaxis.set_ticklabels(["Men", "Women"])
+          conf_matrix.xaxis.set_ticklabels(["Men", "Woman"])
+          conf_matrix.yaxis.set_ticklabels(["Men", "Women"])
 
     for fold, (train_idx,val_idx) in enumerate(splits.split(np.arange(len(gender_set)))):
 
+        print()
         print('Fold {}'.format(fold + 1))
 
         train_sampler = SubsetRandomSampler(train_idx)
