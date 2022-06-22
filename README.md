@@ -1,4 +1,4 @@
-# COMP472-Project
+# COMP472-Project: Face-Mask Detection using a Neural Network
 
 Project done for COMP 472: Artificial Intelligence in the Summer 2022 semester
 
